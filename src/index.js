@@ -61,9 +61,8 @@ class Game extends React.Component {
     const squares = current.squares.slice();
     const winner = calculateWinner(current.squares);
 
-    // Exit early if there's already a winner, or if someone already clicked
-    // on this square.
-    if (winner || squares[i]) {
+    // Exit early if game over, or if someone already clicked on this square.
+    if (winner !== null || squares[i]) {
       return;
     }
 
@@ -83,8 +82,6 @@ class Game extends React.Component {
     // Slice is end exclusive, so +1 to include the move we're jumping to.
     const history = this.state.history.slice(0, moveIdx + 1);
     const stepNumber = history.length - 1;
-
-    console.log(stepNumber, history);
 
     this.setState({
       history,
@@ -111,6 +108,8 @@ class Game extends React.Component {
 
     if (winner) {
       status = `Winner: ${winner}`;
+    } else if (winner === false) {
+      status = `Tie!`;
     } else {
       status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`;
     }
@@ -129,6 +128,14 @@ class Game extends React.Component {
   }
 }
 
+/**
+ * Returns the winner of the game, `false` if game ended in a tie, or `null`
+ * if game isn't over yet.
+ *
+ * @param {Array} squares - Board squares.
+ * @returns {string|boolean|null} - Winner of the game ("X" or "O"), `false`
+ * if game is a tie, or `null` if game isn't over yet.
+ */
 function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
@@ -140,13 +147,24 @@ function calculateWinner(squares) {
     [0, 4, 8],
     [2, 4, 6],
   ];
+
+  // See if there are any winning lines on the board.
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a];
     }
   }
-  return null;
+
+  // If we got here, it means we saw no winning lines. See if there's a tie.
+  for (let i = 0; i < squares.length; i++) {
+    // If we find an empty square, exit early; the game isn't over yet!
+    if (!squares[i]) return null;
+  }
+
+  // If we got here, it means we found no winning lines and no empty squares.
+  // It's a tie!
+  return false;
 }
 
 // ========================================
