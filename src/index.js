@@ -69,7 +69,7 @@ class Game extends React.Component {
     squares[i] = this.state.xIsNext ? 'X' : 'O';
 
     this.setState({
-      history: history.concat([{ squares }]),
+      history: history.concat([{ squares, changedSquare: i }]),
       // It's correct that we're using the length of the history array before
       // concatenating the current move on, because this is an index into the
       // history array, and the array is zero-indexed.
@@ -96,7 +96,8 @@ class Game extends React.Component {
     const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, idx) => {
-      const label = idx ? 'Go to move #' + idx : 'Go to game start';
+      const coords = getSquareCoordinates(step.changedSquare);
+      const label = idx ? `Go to move #${idx}: (${coords[0]}, ${coords[1]})` : 'Go to game start';
       return (
         <li key={idx}>
           <button onClick={() => this.jumpTo(idx)}>{label}</button>
@@ -165,6 +166,26 @@ function calculateWinner(squares) {
   // If we got here, it means we found no winning lines and no empty squares.
   // It's a tie!
   return false;
+}
+
+/**
+ * Returns the x- and y-coordinates of the specified Board square.
+ *
+ * Board squares are indexed like so, with the 0th indexed square at the
+ * top-left being the origin (0, 0):
+ *
+ *  0 1 2
+ *  3 4 5
+ *  6 7 8
+ *
+ * @param {number} i - Board square index.
+ * @returns {Array} - Coordinates of the Board square, as an array of two
+ * numbers `[x, y]`.
+ */
+function getSquareCoordinates(i) {
+  const row = Math.floor(i / 3);
+  const col = i % 3;
+  return [row, col];
 }
 
 // ========================================
